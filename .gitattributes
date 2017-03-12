@@ -1,0 +1,2 @@
+*.v linguist-language=Verilog
+*.do linguist-language=Verilog

@@ -1,0 +1,6 @@
+*.pages
+.DS_Store
+*.aux
+*.log
+*.out
+*.numbers
