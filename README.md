@@ -22,6 +22,10 @@ The red light camera is a feature separate from this FSM. It uses the existing s
 - Connection to sensors to detect when a toy car rolls over or stops at a light
 - Red light camera
 
+### FSM:
+
+![fsm](./img/fsm.png)
+
 ## Milestones
 
 ### First Milestone:
