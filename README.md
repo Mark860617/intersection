@@ -33,10 +33,11 @@ In this milestone we will set up the top level modules of the intersection. We w
 We will also create the counter modules that will be used as one of the factors which will change states in the FSM in milestone 3.
 
 ### Second Milestone:
-In this milestone, we will add modules to handle input from the sensor to detect when a toy car rolls over a sensor and stops at the intersection, and when a car moves through the intersection. We will use this input to determine when to change the light using the finite state machines that we will work on in milestone 3, and to determine if a car is running a red light.
+In this milestone, we will add modules to handle input from the sensor to detect when a toy car rolls over a sensor and stops at the intersection, and when a car moves through the intersection. We will use this input to determine when to change the light using the finite state machines that we will work on in milestone 3, and to determine if a car is running a red light. We will also add an ‘emergency’ feature. This features simulates a situation where an emergency vehicle is coming towards an intersection and sends a signal to turn the light green in it’s direction of travel. We will use switches to simulate a signal from an emergency vehicle being sent, and to indicate the direction the vehicle is coming from. This signal will trigger the FSM to go into a state where the emergency vehicle has a clear path.
 
 ### Third Milestone:
-In this milestone we will create a module for the finite state machine that governs the different states of the intersection. Transitions between the states will occur based upon counters and the input detected by the sensors. We will also implement a module for the red light camera feature, which uses the current state of the FSM and the sensors to determine if a car is running a red light, and triggers an LED if so.
+In this milestone we will create a module for the finite state machine that governs the different states of the intersection. Transitions between the states will occur based upon counters and the input detected by the sensors. We will also implement a module for the red light camera feature, which uses the current state of the FSM and the sensors to determine if a car is running a red light, and triggers an LED if so. Also has the ability to store the time (relative to the start of the simulation) which a driver runs a red light. We will do this using a timer (implemented via a counter) and RAM on the board. Successive runnings of red lights will be stored on different addresses of RAM.
+
 
 ## Motivations
 
