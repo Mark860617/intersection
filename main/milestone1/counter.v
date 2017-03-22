@@ -1,33 +1,47 @@
-module counter(SW, CLOCK_50, HEX0);
-input CLOCK_50;
-input [1:0]SW;
-output [6:0] HEX0;
-wire enable;
-wire [27:0]count1;
-wire [3:0]count2;
-counter1 u0(CLOCK_50, enable, count1[27:0]);
-selector u1(SW[1:0], CLOCK_50, enable, count1[27:0]);
-counter2 u2(enable, CLOCK_50, count2[3:0]);
-displayHEX u3(count2[3:0],HEX0);
-
+module counter(CLOCK_50, enable);
+	input CLOCK_50;
+	output enable;
+	wire enable_second_counter;
+	wire counted_10;
+	counter1 u1(CLOCK_50, 1'b1, enable_second_counter);
+	counter2 u2(enable_second_counter, counted_10);
+	assign enable = counted_10;
 endmodule
 
-//Counter 1 to count 26 bits
-
-module counter1(clock, enable, count1);
-
+// count a second
+module counter1(clock, enable, enable_next);
 
 input clock;
 input enable;
-output [27:0] count1;
-reg [27:0]out = 27'b0;
-assign count1[27:0] = out [27:0];
+output enable_next;
+
+reg [27:0] count = 28'b0;
+assign enable_next = (val == 26'b10111110101111000010000000) ? 1'b1 : 1'b0;
+
+// short cycle for testing
+// reg [2:0] count = 3'b0;
+// assign enable_next = (count == 3'b111) ? 1'b1 : 1'b0;
+
 always @(posedge clock)
 	begin
-	if (enable == 1)
-		out <= 0;
+	if (enable == 0)
+		count <= 0;
 	else
-		out <= out + 1'b1;
+		count <= count + 1'b1;
+	end
+endmodule
+
+module counter2 (enable, enable_next);
+input enable;
+output enable_next;
+
+reg [3:0] count = 4'b0;
+
+assign enable_next = count[3] & ~count[2] & ~count[1] & count[0];  // 1001
+
+always @(posedge enable)
+	begin
+		count <= count + 1'b1;
 	end
 endmodule
 
@@ -55,22 +69,8 @@ always @(posedge clock)
 		end
 endmodule
 
-//Counter 2 for 4 bits
+// Count 10 seconds
 
-module counter2 (enable, clock, count2);
-
-input enable;
-input clock;
-output [3:0] count2;
-reg [3:0]out = 4'b0;
-assign count2[3:0] = out;
-always @(posedge clock)
-	begin
-		if (enable == 1)
-			out <= out + 1'b1;
-	end
-
-endmodule
 
 //HEX Module
 module displayHEX (s,h);
