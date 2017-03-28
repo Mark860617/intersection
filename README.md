@@ -52,4 +52,4 @@ I’ve always been enthused about how traffic lights and traffic control systems
 
 ## License
 
-MIT © Patrick Harris and Anmar Akhtar
+MIT © Patrick Harris and Ammar Akhtar

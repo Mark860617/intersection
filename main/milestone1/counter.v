@@ -23,11 +23,11 @@ assign enable_next = (count == 26'b10111110101111000010000000) ? 1'b1 : 1'b0;
 
 always @(posedge clock)
 	begin
-	if (enable_next == 1'b1) 
+	if (enable_next == 1'b1)
 		begin
 			count <= 0;
 		end
-	else 
+	else
 		begin
 			count <= count + 1'b1;
 		end
@@ -46,7 +46,7 @@ assign enable_next = count[3] & ~count[2] & count[1] & ~count[0];  // 1010
 always @(posedge enable)
 	begin
 		if (enable_next == 1'b1) begin
-			count<=0;			
+			count<=0;
 		end
 		else begin
 			count <= count + 1'b1;
@@ -71,11 +71,11 @@ assign enable_next = (count == 29'b11101110011010110010100000000) ? 1'b1 : 1'b0;
 
 always @(posedge CLOCK_50)
 	begin
-	if (enable_next == 1'b1) 
+	if (enable_next == 1'b1)
 		begin
 			count <= 0;
 		end
-	else 
+	else
 		begin
 			count <= count + 1'b1;
 		end
