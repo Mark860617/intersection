@@ -1,47 +1,84 @@
+// makes enable high after 10 seconds
 module counter(CLOCK_50, enable);
 	input CLOCK_50;
 	output enable;
 	wire enable_second_counter;
-	wire counted_10;
-	counter1 u1(CLOCK_50, 1'b1, enable_second_counter);
-	counter2 u2(enable_second_counter, counted_10);
-	assign enable = counted_10;
+	counter1 u1(CLOCK_50, enable_second_counter);
+	counter2 u2(enable_second_counter, enable);
 endmodule
 
-// count a second
-module counter1(clock, enable, enable_next);
+// counts 50mill posedges (1 second)
+module counter1(clock, enable_next);
 
 input clock;
-input enable;
 output enable_next;
 
-reg [27:0] count = 28'b0;
-assign enable_next = (val == 26'b10111110101111000010000000) ? 1'b1 : 1'b0;
+reg [25:0] count = 26'b0;
+assign enable_next = (count == 26'b10111110101111000010000000) ? 1'b1 : 1'b0;
 
-// short cycle for testing
-// reg [2:0] count = 3'b0;
-// assign enable_next = (count == 3'b111) ? 1'b1 : 1'b0;
+//short cycle for testing
+// reg [2:0] count = 2'b0;
+// assign enable_next = (count == 3'b11) ? 1'b1 : 1'b0;
+
 
 always @(posedge clock)
 	begin
-	if (enable == 0)
-		count <= 0;
-	else
-		count <= count + 1'b1;
+	if (enable_next == 1'b1) 
+		begin
+			count <= 0;
+		end
+	else 
+		begin
+			count <= count + 1'b1;
+		end
 	end
 endmodule
 
+// counts 10 posedges
 module counter2 (enable, enable_next);
 input enable;
 output enable_next;
 
 reg [3:0] count = 4'b0;
 
-assign enable_next = count[3] & ~count[2] & ~count[1] & count[0];  // 1001
+assign enable_next = count[3] & ~count[2] & count[1] & ~count[0];  // 1010
 
 always @(posedge enable)
 	begin
-		count <= count + 1'b1;
+		if (enable_next == 1'b1) begin
+			count<=0;			
+		end
+		else begin
+			count <= count + 1'b1;
+		end
+	end
+endmodule
+
+
+// counts 10 seconds (50mill * 10 cycles )
+module backup_counter(CLOCK_50, enable_next);
+
+input CLOCK_50;
+output enable_next;
+
+reg [28:0] count = 29'b0;
+assign enable_next = (count == 29'b11101110011010110010100000000) ? 1'b1 : 1'b0;
+
+//short cycle for testing
+// reg [4:0] count = 5'b0;
+// assign enable_next = (count == 5'b11110) ? 1'b1 : 1'b0;
+
+
+always @(posedge CLOCK_50)
+	begin
+	if (enable_next == 1'b1) 
+		begin
+			count <= 0;
+		end
+	else 
+		begin
+			count <= count + 1'b1;
+		end
 	end
 endmodule
 
