@@ -1,13 +1,26 @@
 module main(CLOCK_50, SW, GPIO_0, LEDR);
 input CLOCK_50;
 input [9:0] SW;
-output [35:0] GPIO_0;
+inout [35:0] GPIO_0;
 output[0:0] LEDR;
 
 wire counter_en;
+wire [2:0]led_cont;
+wire [1:0] goController;
+
+//fsm lives in another file! Make sure to include fsm.v in the quartus project
+fsm f0(
+  .clk(CLOCK_50),
+  .resetn(SW[9]),
+  .goControl(goController),
+  .ledOut(led_cont)
+  );
+
+// The sensor input comes through port 20
+assign goController[0] = GPIO_0[20];
 
 led_control l0(
-  .fsmIn(SW[2:0]),
+  .fsmIn(led_cont),
   .greenOut(GPIO_0[1:0]),
   .redOut(GPIO_0[3:2]),
   .yellowOut(GPIO_0[5:4]),
