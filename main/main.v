@@ -18,6 +18,7 @@ fsm f0(
 
 // The sensor input comes through port 20
 assign goController[0] = GPIO_0[20];
+assign goController[1] = SW[0];
 
 led_control l0(
   .fsmIn(led_cont),
@@ -26,11 +27,6 @@ led_control l0(
   .yellowOut(GPIO_0[5:4]),
   .leftOut(GPIO_0[7:6])
   );
-
- counter c0(
- .CLOCK_50(CLOCK_50),
- .enable(counter_en)
- );
 
  assign GPIO_0[10] = counter_en;
  assign LEDR[0] = counter_en;

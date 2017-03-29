@@ -58,7 +58,7 @@ localparam  N_GREEN        = 3'd0,
 always@(*)
 begin: state_table
         case (current_state) // All states loop until they are told to go
-            N_GREEN: next_state = (go || counter) ? N_YELLOW : N_GREEN;
+            N_GREEN: next_state = go ? N_YELLOW : N_GREEN;
             N_YELLOW: next_state = (go || counter) ? RED_1: N_YELLOW;
             RED_1: next_state = (go || counter) ? E_LEFT: RED_1;
             E_LEFT: next_state = (go || counter)? E_GREEN: E_LEFT;
@@ -141,4 +141,23 @@ input clk;
 input resetn;
 
 output counterOut;
+
+reg [28:0] count = 29'b0;
+assign counterOut = (count == 29'd250000000) ? 1'b1 : 1'b0;
+
+//short cycle for testing
+// reg [4:0] count = 5'b0;
+// assign enable_next = (count == 5'b11110) ? 1'b1 : 1'b0;
+
+always @(posedge clk)
+	begin
+	if (counterOut == 1'b1)
+		begin
+			count <= 0;
+		end
+	else
+		begin
+			count <= count + 1'b1;
+		end
+	end
 endmodule
