@@ -1,5 +1,47 @@
-module fsm(clk, go, counter, emergency, ledIn);
-input clk, go, counter, emergency;
+
+// The FSM controls the 'go' signal for the FSM
+// goControl is 2 bits: 0 bit is sensor, 1 bit is emergency
+module fsm(clk, resetn, goControl, ledOut);
+input clk, resetn;
+input [1:0] goControl;
+wire go;
+wire [2:0] leds;
+wire lCount;
+
+output [2:0] ledOut;
+
+control c0(
+  .clk(clk),
+  .go(go),
+  .resetn(resetn),
+  .counter(lCount),
+  .ledIn(leds)
+  );
+
+lightCounter lc0(
+  .clk(clk),
+  .resetn(resetn),
+  .counterOut(lCount)
+  );
+  assign go = goControl[0] | goControl[1];
+
+  /* Logic for the go operation based on sensor input */
+  // always @ ( * ) begin
+  //   case (goControl)
+  //     2'b00: go = 1'b0;
+  //     2'b01: go = 1'b1;
+  //     2'b10: go = 1'b1;
+  //     2'b11: go = 1'b1;
+  //     default: go = 1'b0;
+  //   endcase
+  // end
+assign ledOut = leds;
+endmodule
+
+
+// The actual FSM is contained in the 'control' module
+module control(clk, go, resetn, counter, ledIn);
+input clk, go, resetn, counter;
 output reg [2:0] ledIn;
 
 reg [2:0] current_state, next_state;
@@ -16,14 +58,14 @@ localparam  N_GREEN        = 3'd0,
 always@(*)
 begin: state_table
         case (current_state) // All states loop until they are told to go
-            N_GREEN: next_state = go ? N_YELLOW : N_GREEN;
-            N_YELLOW: next_state = go ? RED_1: N_YELLOW;
-            RED_1: next_state = go ? E_LEFT: RED_1;
-            E_LEFT: next_state = go ? E_GREEN: E_LEFT;
-            E_GREEN: next_state = go ? E_YELLOW: E_GREEN;
-            E_YELLOW: next_state = go ? RED_2: E_YELLOW;
-            RED_2: next_state = go ? N_LEFT: RED_2;
-            N_LEFT: next_state = go ? N_GREEN: N_LEFT;
+            N_GREEN: next_state = (go || counter) ? N_YELLOW : N_GREEN;
+            N_YELLOW: next_state = (go || counter) ? RED_1: N_YELLOW;
+            RED_1: next_state = (go || counter) ? E_LEFT: RED_1;
+            E_LEFT: next_state = (go || counter)? E_GREEN: E_LEFT;
+            E_GREEN: next_state = (go || counter) ? E_YELLOW: E_GREEN;
+            E_YELLOW: next_state = (go || counter) ? RED_2: E_YELLOW;
+            RED_2: next_state = (go || counter) ? N_LEFT: RED_2;
+            N_LEFT: next_state = (go || counter) ? N_GREEN: N_LEFT;
         default:     next_state = N_GREEN;
     endcase
 end // state_table
@@ -83,4 +125,20 @@ begin: enable_signals
             end
     endcase
 end // enable_signals
+
+// current_state registers
+always@(posedge clk)
+begin: state_FFs
+    if(!resetn)
+        current_state <= N_GREEN;
+    else
+        current_state <= next_state;
+end // state_FFS
+endmodule
+
+module lightCounter(clk, resetn, counterOut);
+input clk;
+input resetn;
+
+output counterOut;
 endmodule
