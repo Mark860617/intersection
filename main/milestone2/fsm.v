@@ -84,39 +84,39 @@ begin: enable_signals
             ledIn[2] = 1'b0;
           end
         N_YELLOW: begin
-            ledIn[0] = 1'b0;
+            ledIn[0] = 1'b1;
             ledIn[1] = 1'b0;
             ledIn[2] = 1'b0;
           end
         RED_1: begin
             ledIn[0] = 1'b0;
-            ledIn[1] = 1'b0;
+            ledIn[1] = 1'b1;
             ledIn[2] = 1'b0;
           end
         E_LEFT: begin
-            ledIn[0] = 1'b0;
-            ledIn[1] = 1'b0;
+            ledIn[0] = 1'b1;
+            ledIn[1] = 1'b1;
             ledIn[2] = 1'b0;
           end
         E_GREEN: begin
             ledIn[0] = 1'b0;
             ledIn[1] = 1'b0;
-            ledIn[2] = 1'b0;
+            ledIn[2] = 1'b1;
           end
         E_YELLOW: begin
-            ledIn[0] = 1'b0;
+            ledIn[0] = 1'b1;
             ledIn[1] = 1'b0;
-            ledIn[2] = 1'b0;
+            ledIn[2] = 1'b1;
           end
         RED_2: begin
             ledIn[0] = 1'b0;
-            ledIn[1] = 1'b0;
-            ledIn[2] = 1'b0;
+            ledIn[1] = 1'b1;
+            ledIn[2] = 1'b1;
           end
         N_LEFT: begin
-            ledIn[0] = 1'b0;
-            ledIn[1] = 1'b0;
-            ledIn[2] = 1'b0;
+            ledIn[0] = 1'b1;
+            ledIn[1] = 1'b1;
+            ledIn[2] = 1'b1;
             end
     default: begin
             ledIn[0] = 1'b0;
