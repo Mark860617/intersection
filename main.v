@@ -12,7 +12,7 @@ wire [2:0]led_cont;
 wire [1:0] goController;
 
 assign GPIO_0[30:0] = GP_OUT[30:0];
-assign GP_IN[4:0] = {GPIO[35], 4'bzzzz};
+assign GP_IN[4:0] = {GPIO_0[35], 4'bzzzz};
 
 //fsm lives in another file! Make sure to include fsm.v in the quartus project
 fsm f0(
