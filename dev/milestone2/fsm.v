@@ -6,7 +6,8 @@ input clk, resetn;
 input [1:0] goControl;
 wire go;
 wire [2:0] leds;
-wire lCount;
+wire counterten;
+wire counterfive;
 
 output [2:0] ledOut;
 
@@ -14,14 +15,14 @@ control c0(
   .clk(clk),
   .go(go),
   .resetn(resetn),
-  .counter(lCount),
+  .counter10(counterten),
+  .counter5(counterfive),
   .ledIn(leds)
   );
 
-lightCounter lc0(
-  .clk(clk),
-  .resetn(resetn),
-  .counterOut(lCount)
+counter10s c10(
+  .CLOCK_50(clk),
+  .enable(counterten)
   );
   assign go = goControl[0] | goControl[1];
 
@@ -40,8 +41,8 @@ endmodule
 
 
 // The actual FSM is contained in the 'control' module
-module control(clk, go, resetn, counter, ledIn);
-input clk, go, resetn, counter;
+module control(clk, go, resetn, counter10, counter5, ledIn);
+input clk, go, resetn, counter10, counter5;
 output reg [2:0] ledIn;
 
 reg [2:0] current_state, next_state;
@@ -59,13 +60,13 @@ always@(*)
 begin: state_table
         case (current_state) // All states loop until they are told to go
             N_GREEN: next_state = go ? N_YELLOW : N_GREEN;
-            N_YELLOW: next_state = (go || counter) ? RED_1: N_YELLOW;
-            RED_1: next_state = (go || counter) ? E_LEFT: RED_1;
-            E_LEFT: next_state = (go || counter)? E_GREEN: E_LEFT;
-            E_GREEN: next_state = (go || counter) ? E_YELLOW: E_GREEN;
-            E_YELLOW: next_state = (go || counter) ? RED_2: E_YELLOW;
-            RED_2: next_state = (go || counter) ? N_LEFT: RED_2;
-            N_LEFT: next_state = (go || counter) ? N_GREEN: N_LEFT;
+            N_YELLOW: next_state = counter10 ? RED_1: N_YELLOW;
+            RED_1: next_state = counter5 ? E_LEFT: RED_1;
+            E_LEFT: next_state = counter10 ? E_GREEN: E_LEFT;
+            E_GREEN: next_state = counter5 ? E_YELLOW: E_GREEN;
+            E_YELLOW: next_state = counter10 ? RED_2: E_YELLOW;
+            RED_2: next_state = counter5 ? N_LEFT: RED_2;
+            N_LEFT: next_state = counter10 ? N_GREEN: N_LEFT;
         default:     next_state = N_GREEN;
     endcase
 end // state_table

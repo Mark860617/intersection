@@ -6,7 +6,8 @@ input clk, resetn;
 input [1:0] goControl;
 wire go;
 wire [2:0] leds;
-wire lCount;
+wire counterten;
+wire counterfive;
 
 output [2:0] ledOut;
 
@@ -14,15 +15,21 @@ control c0(
   .clk(clk),
   .go(go),
   .resetn(resetn),
-  .counter(lCount),
+  .counter10(counterten),
+  .counter5(counterfive),
   .ledIn(leds)
   );
 
-lightCounter lc0(
-  .clk(clk),
-  .resetn(resetn),
-  .counterOut(lCount)
+counter10s c10(
+  .CLOCK_50(clk),
+  .enable(counterten)
   );
+
+counter5s c5(
+  .CLOCK_50(clk),
+  .enable(counterfive)
+  );
+
   assign go = goControl[0] | goControl[1];
 
   /* Logic for the go operation based on sensor input */
@@ -40,32 +47,46 @@ endmodule
 
 
 // The actual FSM is contained in the 'control' module
-module control(clk, go, resetn, counter, ledIn);
-input clk, go, resetn, counter;
+module control(clk, go, resetn, counter10, counter5, ledIn);
+input clk, go, resetn, counter10, counter5;
 output reg [2:0] ledIn;
 
-reg [2:0] current_state, next_state;
+reg [3:0] current_state, next_state;
 
-localparam  N_GREEN        = 3'd0,
-            N_YELLOW       = 3'd1,
-            RED_1          = 3'd2,
-            E_LEFT         = 3'd3,
-            E_GREEN        = 3'd4,
-            E_YELLOW       = 3'd5,
-            RED_2          = 3'd6,
-            N_LEFT         = 3'd7;
+localparam  N_GREEN        = 4'd0,
+            N_YELLOW       = 4'd1,
+            WAIT_1         = 4'd2,
+            RED_1          = 4'd3,
+            WAIT_2         = 4'd4,
+            E_LEFT         = 4'd5,
+            WAIT_3         = 4'd6,
+            E_GREEN        = 4'd7,
+            WAIT_4         = 4'd8,
+            E_YELLOW       = 4'd9,
+            WAIT_5         = 4'd10,
+            RED_2          = 4'd11,
+            WAIT_6         = 4'd12,
+            N_LEFT         = 4'd13,
+            WAIT_7         = 4'd14;
 
 always@(*)
 begin: state_table
         case (current_state) // All states loop until they are told to go
             N_GREEN: next_state = go ? N_YELLOW : N_GREEN;
-            N_YELLOW: next_state = (go || counter) ? RED_1: N_YELLOW;
-            RED_1: next_state = (go || counter) ? E_LEFT: RED_1;
-            E_LEFT: next_state = (go || counter)? E_GREEN: E_LEFT;
-            E_GREEN: next_state = (go || counter) ? E_YELLOW: E_GREEN;
-            E_YELLOW: next_state = (go || counter) ? RED_2: E_YELLOW;
-            RED_2: next_state = (go || counter) ? N_LEFT: RED_2;
-            N_LEFT: next_state = (go || counter) ? N_GREEN: N_LEFT;
+            N_YELLOW: next_state = counter10 ? WAIT_1: N_YELLOW;
+            WAIT_1: next_state = ~counter10 ? RED_1 : WAIT_1;
+            RED_1: next_state = counter5 ? WAIT_2: RED_1;
+            WAIT_2: next_state = ~counter5 ? E_LEFT : WAIT_2;
+            E_LEFT: next_state = counter10 ? WAIT_3: E_LEFT;
+            WAIT_3: next_state = ~counter10 ? E_GREEN : WAIT_3;
+            E_GREEN: next_state = counter5 ? WAIT_4: E_GREEN;
+            WAIT_4: next_state = ~counter4 ? E_YELLOW: WAIT_4;
+            E_YELLOW: next_state = counter10 ? WAIT_5: E_YELLOW;
+            WAIT_5: next_state = ~counter10 ? RED_2: WAIT_5;
+            RED_2: next_state = counter5 ? WAIT_6: RED_2;
+            WAIT_6: next_state = ~counter5 ? N_LEFT: WAIT_6;
+            N_LEFT: next_state = counter10 ? WAIT_7: N_LEFT;
+            WAIT_7: next_state = ~counter10 ? N_GREEN: WAIT_7;
         default:     next_state = N_GREEN;
     endcase
 end // state_table
@@ -88,7 +109,17 @@ begin: enable_signals
             ledIn[1] = 1'b0;
             ledIn[2] = 1'b0;
           end
+        WAIT_1: begin
+            ledIn[0] = 1'b1;
+            ledIn[1] = 1'b0;
+            ledIn[2] = 1'b0;
+          end
         RED_1: begin
+            ledIn[0] = 1'b0;
+            ledIn[1] = 1'b1;
+            ledIn[2] = 1'b0;
+          end
+        WAIT_2: begin
             ledIn[0] = 1'b0;
             ledIn[1] = 1'b1;
             ledIn[2] = 1'b0;
@@ -98,7 +129,17 @@ begin: enable_signals
             ledIn[1] = 1'b1;
             ledIn[2] = 1'b0;
           end
+        WAIT_3: begin
+            ledIn[0] = 1'b1;
+            ledIn[1] = 1'b1;
+            ledIn[2] = 1'b0;
+          end
         E_GREEN: begin
+            ledIn[0] = 1'b0;
+            ledIn[1] = 1'b0;
+            ledIn[2] = 1'b1;
+          end
+        WAIT_4: begin
             ledIn[0] = 1'b0;
             ledIn[1] = 1'b0;
             ledIn[2] = 1'b1;
@@ -108,7 +149,17 @@ begin: enable_signals
             ledIn[1] = 1'b0;
             ledIn[2] = 1'b1;
           end
+        WAIT_5: begin
+            ledIn[0] = 1'b1;
+            ledIn[1] = 1'b0;
+            ledIn[2] = 1'b1;
+          end
         RED_2: begin
+            ledIn[0] = 1'b0;
+            ledIn[1] = 1'b1;
+            ledIn[2] = 1'b1;
+          end
+        WAIT_6: begin
             ledIn[0] = 1'b0;
             ledIn[1] = 1'b1;
             ledIn[2] = 1'b1;
@@ -117,7 +168,12 @@ begin: enable_signals
             ledIn[0] = 1'b1;
             ledIn[1] = 1'b1;
             ledIn[2] = 1'b1;
-            end
+          end
+        WAIT_7: begin
+            ledIn[0] = 1'b1;
+            ledIn[1] = 1'b1;
+            ledIn[2] = 1'b1;
+          end
     default: begin
             ledIn[0] = 1'b0;
             ledIn[1] = 1'b0;
@@ -134,30 +190,4 @@ begin: state_FFs
     else
         current_state <= next_state;
 end // state_FFS
-endmodule
-
-module lightCounter(clk, resetn, counterOut);
-input clk;
-input resetn;
-
-output counterOut;
-
-reg [28:0] count = 29'b0;
-assign counterOut = (count == 29'd250000000) ? 1'b1 : 1'b0;
-
-//short cycle for testing
-// reg [4:0] count = 5'b0;
-// assign enable_next = (count == 5'b11110) ? 1'b1 : 1'b0;
-
-always @(posedge clk)
-	begin
-	if (counterOut == 1'b1)
-		begin
-			count <= 0;
-		end
-	else
-		begin
-			count <= count + 1'b1;
-		end
-	end
 endmodule
