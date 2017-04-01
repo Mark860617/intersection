@@ -70,7 +70,7 @@ localparam  N_GREEN        = 4'd0,
             WAIT_7         = 4'd14;
 
 always@(*)
-begin: state_table
+begin: state_table // Having two counters might not be nessecary anymore
         case (current_state) // All states loop until they are told to go
           // Wait states force the FSM to wait for more time before going through all the states
             N_GREEN: next_state = go ? N_YELLOW : N_GREEN;
