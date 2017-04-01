@@ -72,6 +72,7 @@ localparam  N_GREEN        = 4'd0,
 always@(*)
 begin: state_table
         case (current_state) // All states loop until they are told to go
+          // Wait states force the FSM to wait for more time before going through all the states
             N_GREEN: next_state = go ? N_YELLOW : N_GREEN;
             N_YELLOW: next_state = counter10 ? WAIT_1: N_YELLOW;
             WAIT_1: next_state = ~counter10 ? RED_1 : WAIT_1;
@@ -80,7 +81,7 @@ begin: state_table
             E_LEFT: next_state = counter10 ? WAIT_3: E_LEFT;
             WAIT_3: next_state = ~counter10 ? E_GREEN : WAIT_3;
             E_GREEN: next_state = counter5 ? WAIT_4: E_GREEN;
-            WAIT_4: next_state = ~counter4 ? E_YELLOW: WAIT_4;
+            WAIT_4: next_state = ~counter5 ? E_YELLOW: WAIT_4;
             E_YELLOW: next_state = counter10 ? WAIT_5: E_YELLOW;
             WAIT_5: next_state = ~counter10 ? RED_2: WAIT_5;
             RED_2: next_state = counter5 ? WAIT_6: RED_2;
@@ -190,4 +191,88 @@ begin: state_FFs
     else
         current_state <= next_state;
 end // state_FFS
+endmodule
+
+module counter10s(CLOCK_50, enable);
+	input CLOCK_50;
+	output enable;
+	wire enable_second_counter;
+	counter1 u1(CLOCK_50, enable_second_counter);
+	counter10pos u2(enable_second_counter, enable);
+endmodule
+
+module counter5s(CLOCK_50, enable);
+  input CLOCK_50;
+  output enable;
+
+  wire enable_second_counter;
+	counter1 u1(CLOCK_50, enable_second_counter);
+  counter5pos u2(enable_second_counter, enable);
+endmodule
+
+// counts 50mill posedges (1 second)
+module counter1(clock, enable_next);
+
+input clock;
+output enable_next;
+
+reg [25:0] count = 26'b0;
+assign enable_next = (count == 26'd50000000) ? 1'b1 : 1'b0;
+
+//short cycle for testing
+// reg [2:0] count = 2'b0;
+// assign enable_next = (count == 3'b11) ? 1'b1 : 1'b0;
+
+
+always @(posedge clock)
+	begin
+	if (enable_next == 1'b1)
+		begin
+			count <= 0;
+		end
+	else
+		begin
+			count <= count + 1'b1;
+		end
+	end
+endmodule
+
+// counts 10 posedges
+module counter10pos (enable, enable_next);
+input enable;
+output enable_next;
+
+reg [3:0] count = 4'b0;
+
+assign enable_next = count[3] & ~count[2] & count[1] & ~count[0];  // 1010
+
+always @(posedge enable)
+	begin
+		if (enable_next == 1'b1) begin
+			count<=0;
+		end
+		else begin
+			count <= count + 1'b1;
+		end
+	end
+endmodule
+
+// counts 5 posedges
+module counter5pos (enable, enable_next);
+input enable;
+output enable_next;
+
+reg [3:0] count = 4'b0;
+
+assign enable_next = ~count[3] & count[2] & ~count[1] & count[0];  // 0101
+
+always @(posedge enable)
+	begin
+		if (enable_next == 1'b1) begin
+			count<=0;
+		end
+		else begin
+			count <= count + 1'b1;
+		end
+	end
 endmodule
