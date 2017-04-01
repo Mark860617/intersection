@@ -135,29 +135,3 @@ begin: state_FFs
         current_state <= next_state;
 end // state_FFS
 endmodule
-
-module lightCounter(clk, resetn, counterOut);
-input clk;
-input resetn;
-
-output counterOut;
-
-reg [28:0] count = 29'b0;
-assign counterOut = (count == 29'd250000000) ? 1'b1 : 1'b0;
-
-//short cycle for testing
-// reg [4:0] count = 5'b0;
-// assign enable_next = (count == 5'b11110) ? 1'b1 : 1'b0;
-
-always @(posedge clk)
-	begin
-	if (counterOut == 1'b1)
-		begin
-			count <= 0;
-		end
-	else
-		begin
-			count <= count + 1'b1;
-		end
-	end
-endmodule
