@@ -1,32 +1,84 @@
-module redlight(clk, fsmState, sensor, ramOut);
+module redlight(clk, resetn, fsmState, sensor, ramOut);
+input clk;
+input resetn;
 input [2:0] fsmState;
 input sensor;
 output [3:0] ramOut;
-wire enable;
-wire [4:0] memAdd;
-wire [3:0] inDat;
+reg enable;
+reg [4:0] memAdd;
+reg [3:0] current_time;
+wire update_time;
 
+assign update_time = 1'b0;
 
-always @ ( * ) begin
+always @ ( posedge sensor ) begin
   case (fsmState)
-    3'd0: ;
-    3'd1: ;
-    3'd2: ;
-    3'd3: ;
-    3'd4: ;
-    3'd5: ;
-    3'd6: ;
-    3'd7:;
-    default: ;
+    // 3'd0: ;                   // nothing to do for these cases (take care of by default)
+    // 3'd1: ;
+    // 3'd2: ;
+    // 3'd3: ;
+    3'd4: enable = 1'b1;  // detected a car on the sensor (while light red)
+    3'd5: enable = 1'b1;
+    3'd6: enable = 1'b1;
+    3'd7: enable = 1'b1;
+    default: enable = 1'b0 ;
   endcase
 end
+
+always @ ( posedge enable ) begin  // increment memory address, for each violation
+	memAdd <= memAdd + 1;
+	enable = 1'b0; // prevent ram from writing more than once
+end
+
+always @ (posedge update_time) begin  // update time 
+	current_time  = current_time + 1;
+end
+always @(*) begin
+	if (~resetn) begin
+		enable <= 1'b0;
+		memAdd <= 5'b0;
+		current_time <= 4'b0;
+	end
+
+end
+
+counter1 count1second(
+	.clock(clk),
+	.enable_next(update_time)
+	);
+
 ram32x4 r0(
   .address(memAdd),
   .clock(clk),
-  .data(inDat),
+  .data(current_time), // store time of violation
   .wren(enable),
   .q(ramOut)
   );
+endmodule
+
+module counter1(clock, enable_next);
+
+input clock;
+output enable_next;
+
+// reg [25:0] count = 26'b0;
+// assign enable_next = (count == 26'b10111110101111000010000000) ? 1'b1 : 1'b0;
+
+//short cycle for testing
+reg [2:0] count = 2'b0;
+assign enable_next = (count == 3'b11) ? 1'b1 : 1'b0;
+
+
+always @(posedge clock) begin
+	if (enable_next == 1'b1)
+		begin
+			count <= 0;
+		end
+	else
+		begin
+			count <= count + 1'b1;
+		end
+end
 endmodule
 
 
