@@ -9,8 +9,6 @@ reg [4:0] memAdd;
 reg [3:0] current_time;
 wire update_time;
 
-assign update_time = 1'b0;
-
 always @ ( posedge sensor ) begin
   case (fsmState)
     // 3'd0: ;                   // nothing to do for these cases (take care of by default)
@@ -25,19 +23,20 @@ always @ ( posedge sensor ) begin
   endcase
 end
 
-always @ ( posedge enable ) begin  // increment memory address, for each violation
+always @ (posedge enable) begin  // increment memory address, for each violation
 	memAdd <= memAdd + 1;
-	enable = 1'b0; // prevent ram from writing more than once
+	//enable <= 1'b0; // prevent ram from writing more than once
 end
 
-always @ (posedge update_time) begin  // update time 
+always @ (posedge update_time) begin  // update time
 	current_time  = current_time + 1;
 end
+
 always @(*) begin
 	if (~resetn) begin
-		enable <= 1'b0;
-		memAdd <= 5'b0;
-		current_time <= 4'b0;
+		enable = 1'b0;
+		memAdd = 5'b0;
+		current_time = 4'b0;
 	end
 
 end

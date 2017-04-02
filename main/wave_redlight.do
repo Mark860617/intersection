@@ -22,13 +22,21 @@ force {resetn} 0
 run 20ps
 
 force {clk} 0 0ps, 1 10ps -r 20ps
-force {fsmState} 100
-force {sensor} 0 0ps, 1 50ps
+force {sensor} 0 0ps, 1 10ps -r 20ps
+
+
+force {fsmState[2]} 1
+force {fsmState[1]} 0
+force {fsmState[0]} 0
 force {resetn} 1
 run 200ps
 
-force {clk} 0 0ps, 1 10ps -r 20ps
-force {fsmState} 100
-force {sensor} 0 0ps, 1 50ps
-force {resetn} 1
+force {fsmState[2]} 0
+force {fsmState[1]} 0
+force {fsmState[0]} 0
+run 200ps
+
+force {fsmState[2]} 1
+force {fsmState[1]} 0
+force {fsmState[0]} 0
 run 200ps
