@@ -5,38 +5,38 @@ input [2:0] fsmState;
 input sensor;
 output [3:0] ramOut;
 reg enable;
-//reg [4:0] memAdd;
+reg [4:0] memAdd;
 reg [3:0] current_time;
 wire update_time;
 
-//assign update_time = 1'b0;
-
-always @ (*) begin
+always @ ( posedge sensor ) begin
   case (fsmState)
     // 3'd0: ;                   // nothing to do for these cases (take care of by default)
     // 3'd1: ;
     // 3'd2: ;
     // 3'd3: ;
-    3'd4:enable = 1'b1;  // detected a car on the sensor (while light red)
-	 3'd5:enable = 1'b1;  // detected a car on the sensor (while light red)
-    3'd6:enable = 1'b1;  // detected a car on the sensor (while light red)
-    3'd7:enable = 1'b1;  // detected a car on the sensor (while light red)
+    3'd4: enable = 1'b1;  // detected a car on the sensor (while light red)
+    3'd5: enable = 1'b1;
+    3'd6: enable = 1'b1;
+    3'd7: enable = 1'b1;
     default: enable = 1'b0 ;
   endcase
-  
-//  if (enable == 1'b0) begin
-//  	 memAdd = memAdd + 1;
-//	end
-  if (~resetn) begin
+end
+
+always @ (posedge enable) begin  // increment memory address, for each violation
+	memAdd <= memAdd + 1;
+	//enable <= 1'b0; // prevent ram from writing more than once
+end
+
+always @ (posedge update_time) begin  // update time
+	current_time  = current_time + 1;
+end
+
+always @(*) begin
+	if (~resetn) begin
 		enable = 1'b0;
-		//memAdd = 5'b0;
+		memAdd = 5'b0;
 		current_time = 4'b0;
-	end
-	if (update_time) begin
-		current_time  = current_time + 1;
-	end
-	if (clk) begin
-		enable = 1'b0;
 	end
 
 end
@@ -47,7 +47,7 @@ counter1 count1second(
 	);
 
 ram32x4 r0(
-  .address(5'b0),
+  .address(memAdd),
   .clock(clk),
   .data(current_time), // store time of violation
   .wren(enable),

@@ -84,7 +84,7 @@ begin: state_table // Having two counters might not be nessecary anymore
             WAIT_4: next_state = ~counter5 ? E_YELLOW: WAIT_4;
             E_YELLOW: next_state = counter10 ? WAIT_5: E_YELLOW;
             WAIT_5: next_state = ~counter10 ? RED_2: WAIT_5;
-            RED_2: next_state = counter5 ? WAIT_6: RED_2;
+            RED_2: next_state = (go | counter5) ? WAIT_6: RED_2;
             WAIT_6: next_state = ~counter5 ? N_LEFT: WAIT_6;
             N_LEFT: next_state = counter10 ? WAIT_7: N_LEFT;
             WAIT_7: next_state = ~counter10 ? N_GREEN: WAIT_7;
@@ -197,8 +197,8 @@ module counter10s(CLOCK_50, enable);
 	input CLOCK_50;
 	output enable;
 	wire enable_second_counter;
-	counter1 u1(CLOCK_50, enable_second_counter);
-	counter10pos u2(enable_second_counter, enable);
+	counter01 u2(CLOCK_50, enable_second_counter);
+	counter10pos u5(enable_second_counter, enable);
 endmodule
 
 module counter5s(CLOCK_50, enable);
@@ -206,12 +206,12 @@ module counter5s(CLOCK_50, enable);
   output enable;
 
   wire enable_second_counter;
-	counter1 u1(CLOCK_50, enable_second_counter);
-  counter5pos u2(enable_second_counter, enable);
+	counter01 u1(CLOCK_50, enable_second_counter);
+  counter5pos u3(enable_second_counter, enable);
 endmodule
 
 // counts 50mill posedges (1 second)
-module counter1(clock, enable_next);
+module counter01(clock, enable_next);
 
 input clock;
 output enable_next;
