@@ -1,6 +1,10 @@
 # intersection
 > CSC258 Final Project
 
+## Preview
+[Link to Demonstration](https://drive.google.com/file/d/0ByNwzGkQKbPMdFdGV3hiODhSXzg/view?usp=sharing)
+
+## About
 A simulation of a traffic control system. We will simulate the intersection of a major road and a small side road. The intersection will have pedestrian crossings, a left turn signal and a ‘red light camera’ (a sensor on the floor actually). The lights will be green for the main road most of the time to allow for flow of traffic. We will use a sensor to detect when a toy car pulls up at the intersection from the smaller road, and a switch to detect when a pedestrian walks up the intersection and presses the cross button. These will trigger the main road to turn red to allow the toy car  or the pedestrian through. After some amount of time, the small road will turn red. This will trigger the larger roads light cycle. This consists of a pedestrian crossing period (i.e. pedestrians are allowed to cross anyway they want for a certain amount of time), then a left turn period (the left turn signals go green), then a general green light period. This cycle will then repeat when the sensor on the smaller road is triggered again.
 
 This whole cycle is essentially a finite state machine. The intersection can have several different states, such as red, green, yellow, left turn, and pedestrian crossing. The movement between these states will be governed by the input from the sensor and counters.
